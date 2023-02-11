@@ -11,8 +11,10 @@ import CoreData
 class ToDoListTableViewController: UITableViewController {
     
     var itemArray = [Item]()
+    
     // context for CoreData == stage area in git
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     // search bar
     var searchController = UISearchController()
     var categoryPredicate = "parentCategory.name MATCHES %@"
@@ -29,6 +31,7 @@ class ToDoListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
         // UISearchController set up
         searchController = UISearchController(searchResultsController: nil)
         searchController.searchBar.placeholder = "Search here..."
@@ -36,19 +39,12 @@ class ToDoListTableViewController: UITableViewController {
         searchController.searchBar.delegate = self
         navigationItem.searchController = searchController
         
-        // refresher setup
+        // refresher setup (just for exploring)
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         refreshControl.tintColor = UIColor.red
         refreshControl.attributedTitle = NSAttributedString(string: "Refreshing...")
         tableView.refreshControl = refreshControl
-        
-        
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-        
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
     
     // MARK: - Add new Item
@@ -75,15 +71,7 @@ class ToDoListTableViewController: UITableViewController {
         present(ac, animated: true)
     }
     
-    @objc func refreshData() {
-        loadData()
-        
-        guard let refreshControl = refreshControl else { return }
-        refreshControl.endRefreshing()
-        tableView.reloadData()
-    }
-    
-    // added submit function with word checking
+    // added submit function for action controller
     func submit(_ item: String) {
         
         let newItem = Item(context: context)
@@ -99,6 +87,15 @@ class ToDoListTableViewController: UITableViewController {
         return
     }
     
+    // method fo refresh data
+    @objc func refreshData() {
+        loadData()
+        
+        guard let refreshControl = refreshControl else { return }
+        refreshControl.endRefreshing()
+        tableView.reloadData()
+    }
+    
     // MARK: - CRUD for CoreData
     
     func saveData() {
@@ -111,10 +108,10 @@ class ToDoListTableViewController: UITableViewController {
         
     }
     
-    
     func loadData(with request: NSFetchRequest<Item> = Item.fetchRequest(), predicate: NSPredicate? = nil) {
         let categoryPredicate = NSPredicate(format: categoryPredicate, selectedCategory!.name!)
         
+        // array of predicate
         if let additonalPredicate = predicate {
             request.predicate =  NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, additonalPredicate])
         } else {
@@ -136,10 +133,8 @@ class ToDoListTableViewController: UITableViewController {
         
         
     }
-    // Update in override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     
-    
-    // MARK: - Table view data source
+    // MARK: - Table view data source and delegate
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
@@ -151,7 +146,7 @@ class ToDoListTableViewController: UITableViewController {
         return itemArray.count
     }
     
-    
+    // setup cell
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
@@ -176,6 +171,7 @@ class ToDoListTableViewController: UITableViewController {
         
     }
     
+    // add delete cell functional
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             deleteData(with: indexPath)
@@ -183,55 +179,6 @@ class ToDoListTableViewController: UITableViewController {
             tableView.deleteRows(at: [indexPath], with: .bottom)
         }
     }
-    
-    
-    
-    
-    /*
-     // Override to support conditional editing of the table view.
-     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-     // Return false if you do not want the specified item to be editable.
-     return true
-     }
-     */
-    
-    /*
-     // Override to support editing the table view.
-     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-     if editingStyle == .delete {
-     // Delete the row from the data source
-     tableView.deleteRows(at: [indexPath], with: .fade)
-     } else if editingStyle == .insert {
-     // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-     }
-     }
-     */
-    
-    /*
-     // Override to support rearranging the table view.
-     override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-     
-     }
-     */
-    
-    /*
-     // Override to support conditional rearranging of the table view.
-     override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-     // Return false if you do not want the item to be re-orderable.
-     return true
-     }
-     */
-    
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destination.
-     // Pass the selected object to the new view controller.
-     }
-     */
-    
 }
 
 // MARK: - UISearchBarDelegate
